@@ -15,6 +15,7 @@ protected:
 protected:
     Vector interpolate_3(double u, const Vector& P0, const Vector& P1, const Vector& P2, const Vector& P3);
     Vector interpolate_4(double u, const Vector& P0, const Vector& P1, const Vector& P2, const Vector& P3, const Vector& P4);
+    Vector interpolate_lambda_4(double u, const Vector& P0, const Vector& P1, const Vector& P2, const Vector& P3, double lambda);
 };
 
 #endif
