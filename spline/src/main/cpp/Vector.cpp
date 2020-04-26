@@ -7,7 +7,6 @@ Vector::Vector()
 , y(0)
 , z(0)
 {
-
 }
 
 Vector::Vector(double _x, double _y, double _z)
@@ -19,12 +18,12 @@ Vector::Vector(double _x, double _y, double _z)
 
 double Vector::length() const
 {
-	return sqrt(x*x + y* y + z*z);
+    return sqrt(x*x + y*y + z*z);
 }
 
 bool Vector::operator==(const Vector& rhs) const
 {
-	if(this->x== rhs.x && this->y == rhs.y && this->z == rhs.z)
+    if(this->x == rhs.x && this->y == rhs.y && this->z == rhs.z)
 	{
 		return true;
 	}
@@ -33,7 +32,7 @@ bool Vector::operator==(const Vector& rhs) const
 
 bool Vector::operator != (const Vector& rhs) const
 {
-	if(this->x== rhs.x && this->y == rhs.y && this->z == rhs.z)
+    if(this->x == rhs.x && this->y == rhs.y && this->z == rhs.z)
 	{
 		return false;
 	}
@@ -60,9 +59,9 @@ bool Vector::operator>=(const Vector& rhs) const
 
 Vector Vector::cross(const Vector& rhs) const
 {
-	double vx=this->y * rhs.z - this->z * rhs.y;
-	double vy= - (this->x * rhs.z - this->z * rhs.x);
-	double vz=this->x * rhs.y - this->y * rhs.x;
+    double vx = this->y * rhs.z - this->z * rhs.y;
+    double vy =  - (this->x * rhs.z - this->z * rhs.x);
+    double vz = this->x * rhs.y - this->y * rhs.x;
 
 	return Vector(vx, vy, vz);
 }
@@ -74,13 +73,14 @@ double Vector::dot(const Vector& rhs) const
 
 double Vector::lengthSq() const
 {
-	return this->x * this->x + this->y * this->y + this->z * this->z;
+    return this->x * this->x + this->y * this->y + this->z * this->z;
 }
 
 Vector Vector::Truncate(double max_value) const
 {
 	Vector v(x, y, z);
-	double len=this->length();
+    double len = this->length();
+
 	if(len == 0)
 	{
 		return v;
@@ -99,6 +99,7 @@ Vector Vector::Truncate(double max_value) const
 Vector Vector::normalize() const
 {
 	double vl = this->length();
+
 	if(vl == 0)
 	{
 		return Vector();
@@ -106,23 +107,23 @@ Vector Vector::normalize() const
 
 	double vx = this->x / vl;
 	double vy = this->y / vl;
-	double vz= this->z / vl;
+    double vz = this->z / vl;
 
 	return Vector(vx, vy, vz);
 }
 
 Vector::Vector(const Vector& rhs)
 {
-	this->x=rhs.x;
-	this->y=rhs.y;
-	this->z=rhs.z;
+    this->x = rhs.x;
+    this->y = rhs.y;
+    this->z = rhs.z;
 }
 
 Vector& Vector::operator=(const Vector& rhs)
 {
-	this->x=rhs.x;
-	this->y=rhs.y;
-	this->z=rhs.z;
+    this->x = rhs.x;
+    this->y = rhs.y;
+    this->z = rhs.z;
 
 	return *this;
 }
@@ -179,35 +180,35 @@ std::string Vector::toFile() const
 
 Vector operator+(const Vector& v1, const Vector& v2)
 {
-	Vector v=v1;
-	v+=v2;
+    Vector v = v1;
+    v += v2;
 	return v;
 }
 
 Vector operator-(const Vector& v1, const Vector& v2)
 {
-	Vector v=v1;
-	v-=v2;
+    Vector v = v1;
+    v -= v2;
 	return v;
 }
 
 Vector operator*(const Vector& v1, double value)
 {
-	Vector v=v1;
-	v*=value;
+    Vector v = v1;
+    v *= value;
 	return v;
 }
 
 Vector operator/(const Vector& v1, double value)
 {
-	Vector v=v1;
-	v/=value;
+    Vector v = v1;
+    v /= value;
 	return v;
 }
 
 Vector operator*(double value, const Vector& v1)
 {
-	Vector v=v1;
-	v*=value;
+    Vector v = v1;
+    v *= value;
 	return v;
 }

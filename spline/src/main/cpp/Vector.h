@@ -32,10 +32,10 @@ public:
 	Vector& operator/=(double value);
 
 public:
-	bool operator <=(const Vector& rhs) const;
-	bool operator >=(const Vector& rhs) const;
-	bool operator ==(const Vector& rhs) const;
-	bool operator !=(const Vector& rhs) const;
+    bool operator <=(const Vector& rhs) const;
+    bool operator >=(const Vector& rhs) const;
+    bool operator ==(const Vector& rhs) const;
+    bool operator !=(const Vector& rhs) const;
 
 public:
 	void reset() { x=0; y=0; z=0; }
