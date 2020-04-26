@@ -1,13 +1,15 @@
 #include <iostream>
 #include <fstream>
-#include <math.h>
+#include <cmath>
 #include "BSpline.h"
+
+#define _USE_MATH_DEFINES
 
 void demo_bspline(int n_test);
 double function(double x);
 
-int main(char** argv, int argc) {
-
+int main(char** argv, int argc)
+{
     int n_test = 36;          // used only for test
     //std::cin >> n_test;     //
 
@@ -15,9 +17,10 @@ int main(char** argv, int argc) {
 	system("pause");
 }
 
-double func(double x)
+double test(double x)
 {
-    return sin(x);
+    double a = 0.05;
+    return 0.5 * M_1_PI * sqrt(a * (2 + a)) / (1 + a - cos(x));
 }
 
 void demo_bspline(int n_test)
@@ -25,9 +28,10 @@ void demo_bspline(int n_test)
 	Curve* curve = new BSpline();
     curve->set_steps(1000);
 
-    for (int i = 0; i <= n_test; i++)
+    for (int i = (-1) * n_test / 2; i <= n_test / 2; i++)
     {
-        curve->add_way_point(Vector(i, func((double)i), 0));
+        double x = 2 * M_PI * i/n_test;
+        curve->add_way_point(Vector(x, test(x), 0));
     }
 
 	std::cout << "nodes: " << curve->node_count() << std::endl;
@@ -37,7 +41,7 @@ void demo_bspline(int n_test)
         std::cout << "node #" << i << ": " << curve->node(i).toString() << " (length so far: " << curve->length_from_starting_point(i) << ")" << std::endl;
     }
 
-    std::ofstream outfile("test(3)_lambda-1.txt");
+    std::ofstream outfile("test(4)_lambda1.txt");
 
     for (int i = 0; i < curve->node_count(); ++i)
 		outfile << curve->node(i).toFile();
