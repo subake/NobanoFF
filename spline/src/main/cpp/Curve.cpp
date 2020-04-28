@@ -19,7 +19,7 @@ void Curve::add_node(const Vector& node) {
     _nodes.push_back(node);
 	
     if (_nodes.size() == 1) {
-	_distances.push_back(0);
+	 _distances.push_back(0);
     } else {
          int new_node_index=_nodes.size() - 1;
          double segment_distance=(_nodes[new_node_index] - _nodes[new_node_index - 1]).length();
