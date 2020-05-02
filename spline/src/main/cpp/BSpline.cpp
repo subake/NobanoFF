@@ -20,7 +20,7 @@ void BSpline::_on_way_point_added() {
 
         //add_node(interpolate_3(u, _way_points[pt], _way_points[pt + 1], _way_points[pt + 2], _way_points[pt + 3]));
         //add_node(interpolate_4(u, _way_points[pt], _way_points[pt + 1], _way_points[pt + 2], _way_points[pt + 3], _way_points[pt + 4]));
-        add_node(interpolate_4_lambda(u, _way_points[pt], _way_points[pt + 1], _way_points[pt + 2], _way_points[pt + 3], 0));
+        add_node(interpolate_4_lambda(u, _way_points[pt], _way_points[pt + 1], _way_points[pt + 2], _way_points[pt + 3], 1));
     }
 }
 
