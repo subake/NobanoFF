@@ -40,6 +40,7 @@ void bspline(double *points, int N, int M) {
 		byteCode.var[0] = points[i];
         curve->add_way_point(Vector(byteCode.var[0], byteCode.run(), 0));
     }
+	curve->compute();
 
     std::cout << "nodes: " << curve->node_count() << std::endl;
     std::cout << "total length: " << curve->total_length() << std::endl;
