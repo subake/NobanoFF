@@ -1,13 +1,13 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
-#include "../../main/cpp/BSpline.h"
-#include "../../main/cpp/atmsp.h"
+#include "BSpline.h"
+#include "atmsp.h"
 
 ATMSP<double> parser;
 ATMSB<double> byteCode;
 
-void bspline(double *points, int N, int M);
+void bspline(double *points, int N, int M, int argc, char** argv);
 
 int main(int argc, char** argv) {
 	double a, b;
@@ -28,11 +28,11 @@ int main(int argc, char** argv) {
 	if (err)
 		std::cout << "Parsing failed with: " << parser.errMessage(err) << std::endl;
 
-    bspline(points, N, M);
+    bspline(points, N, M, argc, argv);
     system("pause");
 }
 
-void bspline(double *points, int N, int M) {
+void bspline(double *points, int N, int M, int argc, char** argv) {
     Curve* curve = new BSpline();
     curve->set_steps(M);
 
@@ -40,7 +40,7 @@ void bspline(double *points, int N, int M) {
 		byteCode.var[0] = points[i];
         curve->add_way_point(Vector(byteCode.var[0], byteCode.run(), 0));
     }
-	curve->compute();
+    curve->compute(argc, argv);
 
     std::cout << "nodes: " << curve->node_count() << std::endl;
     std::cout << "total length: " << curve->total_length() << std::endl;
