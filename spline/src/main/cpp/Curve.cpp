@@ -14,8 +14,8 @@ void Curve::add_way_point(const Vector& point) {
     _way_points.push_back(point);
 }
 
-void Curve::compute() {
-	_compute_interpolation();
+void Curve::compute(int argc, char** argv) {
+    _compute_interpolation(argc, argv);
 }
 
 void Curve::add_node(const Vector& node) {

@@ -1,6 +1,7 @@
 #include "BSpline.h"
 #include <iostream>
 #include "mpi.h"
+#include <cmath>
 
 BSpline::BSpline() : Curve() {}
 
@@ -21,7 +22,7 @@ void BSpline::_on_way_point_added() {
     }
 }
 
-void BSpline::_compute_interpolation() {
+void BSpline::_compute_interpolation(int argc, char** argv) {
 	if (_way_points.size() < 4) {
 		return;
 	}
@@ -56,7 +57,9 @@ void BSpline::_compute_interpolation() {
 		else if (len*rank < static_cast<int>(_way_points.size()) - 4)
 			sz = static_cast<int>(_way_points.size()) - 4 - len * rank;
 
-		st = MPI_Send(nodes(), sz, MPI_DOUBLE, 0, 11, MPI_COMM_WORLD);
+		std::vector<Vector> tmp = nodes();
+
+		st = MPI_Send(&tmp, sz, MPI_DOUBLE, 0, 11, MPI_COMM_WORLD);
 		if (st != MPI_SUCCESS) {
 			MPI_Abort(MPI_COMM_WORLD, 4);
 		}
@@ -75,7 +78,7 @@ void BSpline::_compute_interpolation() {
 			sz = len;
 		else if (len*j < static_cast<int>(_way_points.size()) - 4)
 			sz = static_cast<int>(_way_points.size()) - 4 - len * j;
-		st = MPI_Recv(tmp, sz, MPI_DOUBLE, j, 11, MPI_COMM_WORLD, &status);
+		st = MPI_Recv(&tmp, sz, MPI_DOUBLE, j, 11, MPI_COMM_WORLD, &status);
 		if (st != MPI_SUCCESS) {
 			MPI_Abort(MPI_COMM_WORLD, 4);
 		}

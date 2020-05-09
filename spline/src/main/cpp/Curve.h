@@ -14,17 +14,20 @@ protected:
     std::vector<Vector> _way_points;
 public:
     void add_way_point(const Vector& point);
+    void compute(int argc, char** argv);
     void clear();
 
 protected:
     void add_node(const Vector& node);
-    virtual void _on_way_point_added()=0;
+    virtual void _on_way_point_added() = 0;
+    virtual void _compute_interpolation(int argc, char** argv) = 0;
 
 protected:
     std::vector<Vector> _nodes;
     std::vector<double> _distances;
 public:
     Vector node(int i) const { return _nodes[i]; }
+    std::vector<Vector> nodes() const { return _nodes; };
     double length_from_starting_point(int i) const { return _distances[i]; }
     bool has_next_node(int i) const { return static_cast<int>(_nodes.size()) > i; }
     int node_count() const {  return static_cast<int>(_nodes.size()); }

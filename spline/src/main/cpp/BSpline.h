@@ -10,7 +10,7 @@ public:
 
 protected:
     virtual void _on_way_point_added();
-	virtual void _compute_interpolation();
+    virtual void _compute_interpolation(int argc, char** argv);
 
 protected:
     Vector interpolate_3(double u, const Vector& P0, const Vector& P1, const Vector& P2, const Vector& P3);
