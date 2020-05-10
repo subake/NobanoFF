@@ -1,7 +1,5 @@
 #include "BSpline.h"
 #include <iostream>
-#include "mpi.h"
-#include <cmath>
 
 BSpline::BSpline() : Curve() {}
 
@@ -20,73 +18,6 @@ void BSpline::_on_way_point_added() {
         double u = (double)i / (double)_steps;
         add_node(interpolate_6_lambda(u, _way_points[pt], _way_points[pt + 1], _way_points[pt + 2], _way_points[pt + 3], 1));
     }
-}
-
-void BSpline::_compute_interpolation(int argc, char** argv) {
-	if (_way_points.size() < 4) {
-		return;
-	}
-
-	int st = MPI_Init(&argc, &argv);
-	int size;
-	int rank;
-	MPI_Status status;
-	if (st != MPI_SUCCESS) {
-		MPI_Abort(MPI_COMM_WORLD, 1);
-	}
-	if (MPI_Comm_size(MPI_COMM_WORLD, &size) != MPI_SUCCESS) {
-		MPI_Abort(MPI_COMM_WORLD, 2);
-	}
-	if (MPI_Comm_rank(MPI_COMM_WORLD, &rank) != MPI_SUCCESS) {
-		MPI_Abort(MPI_COMM_WORLD, 3);
-	}
-
-	int len = (int)ceil((static_cast<int>(_way_points.size()) - 4) / size);
-
-	for (int pt = len * rank; (pt < len*(rank + 1)) && (pt < static_cast<int>(_way_points.size()) - 4); pt++) {
-		for (int i = 0; i <= _steps; i++) {
-			double u = (double)i / (double)_steps;
-			add_node(interpolate_6_lambda(u, _way_points[pt], _way_points[pt + 1], _way_points[pt + 2], _way_points[pt + 3], 1));
-		}
-	}
-
-	if (rank != 0) {
-		int sz = 0;
-		if (len*(rank + 1) < static_cast<int>(_way_points.size()) - 4)
-			sz = len;
-		else if (len*rank < static_cast<int>(_way_points.size()) - 4)
-			sz = static_cast<int>(_way_points.size()) - 4 - len * rank;
-
-		std::vector<Vector> tmp = nodes();
-
-		st = MPI_Send(&tmp, sz, MPI_DOUBLE, 0, 11, MPI_COMM_WORLD);
-		if (st != MPI_SUCCESS) {
-			MPI_Abort(MPI_COMM_WORLD, 4);
-		}
-		st = MPI_Finalize();
-		if (st != MPI_SUCCESS)
-		{
-			MPI_Abort(MPI_COMM_WORLD, 6);
-		}
-		return;
-	}
-
-	std::vector<Vector> tmp;
-	for (int j = 1; j < size; j++) {
-		int sz = 0;
-		if (len*(j + 1) < static_cast<int>(_way_points.size()) - 4)
-			sz = len;
-		else if (len*j < static_cast<int>(_way_points.size()) - 4)
-			sz = static_cast<int>(_way_points.size()) - 4 - len * j;
-		st = MPI_Recv(&tmp, sz, MPI_DOUBLE, j, 11, MPI_COMM_WORLD, &status);
-		if (st != MPI_SUCCESS) {
-			MPI_Abort(MPI_COMM_WORLD, 4);
-		}
-
-		for (int i = 0; i < static_cast<int>(tmp.size()); i++)
-			add_node(tmp[i]);
-	}
-
 }
 
 Vector BSpline::interpolate_3(double u, const Vector& P0, const Vector& P1, const Vector& P2, const Vector& P3) {

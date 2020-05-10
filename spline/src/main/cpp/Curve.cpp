@@ -12,10 +12,7 @@ void Curve::clear() {
 
 void Curve::add_way_point(const Vector& point) {
     _way_points.push_back(point);
-}
-
-void Curve::compute(int argc, char** argv) {
-    _compute_interpolation(argc, argv);
+    _on_way_point_added();
 }
 
 void Curve::add_node(const Vector& node) {
