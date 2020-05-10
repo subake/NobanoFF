@@ -1,70 +1,151 @@
+#include "mpi.h"
 #include <iostream>
 #include <fstream>
 #include <cmath>
-#include "BSpline.h"
-#include "atmsp.h"
+#include <ctime>
+#include "stdio.h"
+#include "../../main/cpp/BSpline.h"
+#include "../../main/cpp/atmsp.h"
 
 ATMSP<double> parser;
 ATMSB<double> byteCode;
 
-void bspline(double *points, int N, int M, int argc, char** argv);
+void bspline(double *points, int N, int M, int rank, int size);
 
 int main(int argc, char** argv) {
-	double a, b;
-	int N, M;
-	std::string func;
-	std::cout << "Enter your function: ";
-	std::getline(std::cin, func);
-	std::cout << "Enter the segment and the number of internal points to approximate (a b N): ";
-	std::cin >> a >> b >> N;
-	std::cout << "Enter the number of steps: ";
-	std::cin >> M;
+    clock_t t;
+    double a, b;
+    int N, M;
+    char func[128];
 
-	double points[1000] = { 0 };
-	for (int i = 0; i <= N + 1; ++i)
-		points[i] = a + i * (b - a) / (N + 1);
+    int st = MPI_Init(&argc, &argv);
+    int size;
+    int rank;
+    MPI_Status status;
+    if (st != MPI_SUCCESS) {
+        MPI_Abort(MPI_COMM_WORLD, 1);
+    }
+    if (MPI_Comm_size(MPI_COMM_WORLD, &size) != MPI_SUCCESS) {
+        MPI_Abort(MPI_COMM_WORLD, 2);
+    }
+    if (MPI_Comm_rank(MPI_COMM_WORLD, &rank) != MPI_SUCCESS) {
+        MPI_Abort(MPI_COMM_WORLD, 3);
+    }
 
-	size_t err = parser.parse(byteCode, func, "x");
-	if (err)
-		std::cout << "Parsing failed with: " << parser.errMessage(err) << std::endl;
+    if(rank == 0) {
+        std::cout << "Enter your function: ";
+        std::cin.getline(func, 128);
+        std::cout << "Enter the segment and the number of internal points to approximate (a b N): ";
+        std::cin >> a >> b >> N;
+        std::cout << "Enter the number of steps: ";
+        std::cin >> M;
+    }
+    MPI_Bcast(&a, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&b, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&N, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&M, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(func, 128, MPI_CHAR, 0, MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
 
-    bspline(points, N, M, argc, argv);
-    system("pause");
+    double points[10000] = { 0 };
+    int len = (int)ceil((N - 1) / size) + 1;
+
+    int sz = 0;
+
+    for (int i = len * rank; (i < len*(rank + 1) + 3) && (i < N + 2); i++) {
+	points[sz] = a + i * (b - a) / (N + 1);
+        sz++;
+    }
+
+    size_t err = parser.parse(byteCode, func, "x");
+    if (err) {
+        std::cout << "Parsing failed with: " << parser.errMessage(err) << std::endl;
+
+        st = MPI_Finalize();
+        if (st != MPI_SUCCESS) {
+            MPI_Abort(MPI_COMM_WORLD, 6);
+        }
+    }
+
+    bspline(points, sz, M, rank, size);
+
+    t = clock() - t;
+
+    if(rank == size - 1) {
+        printf ("It took me %f seconds.\n", ((float)t)/CLOCKS_PER_SEC);
+    }
+
+    return 0;
 }
 
-void bspline(double *points, int N, int M, int argc, char** argv) {
+void bspline(double *points, int N, int M, int rank, int size) {
+    int st;
+    MPI_Status status;
     Curve* curve = new BSpline();
     curve->set_steps(M);
 
-    for (int i = 0; i <= N + 1; i++) {
-		byteCode.var[0] = points[i];
+    for (int i = 0; i < N; i++) {
+	byteCode.var[0] = points[i];
         curve->add_way_point(Vector(byteCode.var[0], byteCode.run(), 0));
     }
-    curve->compute(argc, argv);
+//    curve->compute(&argc, &argv);
 
-    std::cout << "nodes: " << curve->node_count() << std::endl;
-    std::cout << "total length: " << curve->total_length() << std::endl;
-    for (int i = 0; i < curve->node_count(); ++i) {
-        std::cout << "node #" << i << ": " << curve->node(i).toString() << " (length so far: " << curve->length_from_starting_point(i) << ")" << std::endl;
+//    std::cout << "nodes: " << curve->node_count() << std::endl;
+//    std::cout << "total length: " << curve->total_length() << std::endl;
+//    for (int i = 0; i < curve->node_count(); ++i) {
+//        std::cout << "node #" << i << ": " << curve->node(i).toString() << " (length so far: " << curve->length_from_starting_point(i) << ")" << std::endl;
+//    }
+
+    int tk = 0;
+    if (rank != 0) {
+        st = MPI_Recv(&tk, 1, MPI_INT, rank - 1, 0, MPI_COMM_WORLD, &status);
+        if (st != MPI_SUCCESS) {
+            MPI_Abort(MPI_COMM_WORLD, 4);
+        }
     }
 
-    std::ofstream outf_approx("test_approx.txt");
+    std::ofstream outf_approx;
+
+    if (rank == 0) {
+        outf_approx.open("test_approx.txt");
+    }
+    else {
+        outf_approx.open("test_approx.txt", std::ios::app);
+    }
 
     for (int i = 0; i < curve->node_count(); ++i) {
-	outf_approx << curve->node(i).toFile();
+        outf_approx << curve->node(i).toFile();
     }
 
     outf_approx.close();
 
-	std::ofstream outf_func("test_func.txt");
+    std::ofstream outf_func;
 
-	double h = (points[N] - points[1]) / (M * (N - 1));
-	for (int i = 0; i <= M * (N - 1); ++i) {
-		byteCode.var[0] =  points[1] + h*i;
-		outf_func << byteCode.var[0] << " " << byteCode.run() << std::endl;
-	}
+    if (rank == 0) {
+        outf_func.open("test_func.txt");
+    }
+    else {
+        outf_func.open("test_func.txt", std::ios::app);
+    }
 
-	outf_func.close();
+    double h = (points[N - 2] - points[1]) / (M * (N - 3));
+    for (int i = 0; i <= M * (N - 3); ++i) {
+        byteCode.var[0] =  points[1] + h*i;
+        outf_func << byteCode.var[0] << " " << byteCode.run() << std::endl;
+    }
+
+    outf_func.close();
+
+    st = MPI_Send(&tk, 1, MPI_INT, (rank + 1) % size, 0, MPI_COMM_WORLD);
+    if (st != MPI_SUCCESS) {
+        MPI_Abort(MPI_COMM_WORLD, 4);
+    }
 
     delete curve;
+
+    st = MPI_Finalize();
+    if (st != MPI_SUCCESS)
+    {
+        MPI_Abort(MPI_COMM_WORLD, 6);
+    }
 }
