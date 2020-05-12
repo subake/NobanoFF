@@ -10,12 +10,12 @@
 ATMSP<double> parser;
 ATMSB<double> byteCode;
 
-void bspline(double *points, int N, int M, int rank, int size);
+void bspline(double *points, int N, int M, int rank, int size, int p, double lambda);
 
 int main(int argc, char** argv) {
     clock_t t;
-    double a, b;
-    int N, M;
+    double a, b, lambda = 0;
+    int N, M, p;
     char func[128];
 
     int st = MPI_Init(&argc, &argv);
@@ -39,11 +39,23 @@ int main(int argc, char** argv) {
         std::cin >> a >> b >> N;
         std::cout << "Enter the number of steps: ";
         std::cin >> M;
+		std::cout << "Enter the order: ";
+		std::cin >> p;
+		if (p > 3 && p < 7) {
+			std::cout << "Enter the lambda parameter (" << -p * (p - 2) << " <= lambda <= 1): ";
+			std::cin >> lambda;
+			if (-p * (p - 2) > lambda || lambda > 1)
+				lambda = 0;
+		}
+		else
+			p = 4;
     }
     MPI_Bcast(&a, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Bcast(&b, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Bcast(&N, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&M, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&p, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&lambda, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Bcast(func, 128, MPI_CHAR, 0, MPI_COMM_WORLD);
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -67,7 +79,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    bspline(points, sz, M, rank, size);
+    bspline(points, sz, M, rank, size, p, lambda);
 
     t = clock() - t;
 
@@ -78,23 +90,16 @@ int main(int argc, char** argv) {
     return 0;
 }
 
-void bspline(double *points, int N, int M, int rank, int size) {
+void bspline(double *points, int N, int M, int rank, int size, int p, double lambda) {
     int st;
     MPI_Status status;
-    Curve* curve = new BSpline();
+    Curve* curve = new BSpline(p, lambda);
     curve->set_steps(M);
 
     for (int i = 0; i < N; i++) {
 	byteCode.var[0] = points[i];
         curve->add_way_point(Vector(byteCode.var[0], byteCode.run(), 0));
     }
-//    curve->compute(&argc, &argv);
-
-//    std::cout << "nodes: " << curve->node_count() << std::endl;
-//    std::cout << "total length: " << curve->total_length() << std::endl;
-//    for (int i = 0; i < curve->node_count(); ++i) {
-//        std::cout << "node #" << i << ": " << curve->node(i).toString() << " (length so far: " << curve->length_from_starting_point(i) << ")" << std::endl;
-//    }
 
     int tk = 0;
     if (rank != 0) {

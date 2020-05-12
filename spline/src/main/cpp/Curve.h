@@ -14,7 +14,6 @@ protected:
     std::vector<Vector> _way_points;
 public:
     void add_way_point(const Vector& point);
-    //void compute(int argc, char** argv);
     void clear();
 
 protected:
