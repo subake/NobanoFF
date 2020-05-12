@@ -1,7 +1,7 @@
 #include "BSpline.h"
 #include <iostream>
 
-BSpline::BSpline() : Curve(), _p(4), _lambda(0) {}
+BSpline::BSpline() : Curve(), p(4), lambda(0) {}
 
 BSpline::BSpline(int _p, double _lambda) : Curve(), p(_p), lambda(_lambda) {}
 
@@ -15,7 +15,7 @@ void BSpline::_on_way_point_added() {
     int new_control_point_index = static_cast<int>(_way_points.size()) - 1;
     int pt = new_control_point_index - 3;
 
-	switch p {
+	switch (p) {
 	case 6:
 		for (int i = 0; i <= _steps; i++) {
 			double u = (double)i / (double)_steps;

@@ -6,14 +6,14 @@
 class BSpline : public Curve {
 public:
     BSpline();
-	BSpline(int _p, double _lambda);
+	BSpline(int p, double lambda);
     virtual ~BSpline();
 
 protected:
     virtual void _on_way_point_added();
 
 protected:
-	int p ;
+	int p;
 	double lambda;
 
 protected:
