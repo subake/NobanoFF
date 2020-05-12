@@ -13,7 +13,6 @@ ATMSB<double> byteCode;
 void bspline(double *points, int N, int M, int rank, int size, int p, double lambda);
 
 int main(int argc, char** argv) {
-    clock_t t;
     double a, b, lambda = 0;
     int N, M, p;
     char func[128];
@@ -50,6 +49,7 @@ int main(int argc, char** argv) {
 		else
 			p = 4;
     }
+    clock_t t;
     MPI_Bcast(&a, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Bcast(&b, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Bcast(&N, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
     t = clock() - t;
 
     if(rank == size - 1) {
-        printf ("It took me %f seconds.\n", ((float)t)/CLOCKS_PER_SEC);
+        printf ("Work time: %f seconds\n", ((float)t)/CLOCKS_PER_SEC);
     }
 
     return 0;
