@@ -4,8 +4,8 @@
 #include <cmath>
 #include <ctime>
 #include "stdio.h"
-#include "../../main/cpp/BSpline.h"
-#include "../../main/cpp/atmsp.h"
+#include "BSpline/BSpline.h"
+#include "libs/atmsp.h"
 
 ATMSP<double> parser;
 ATMSB<double> byteCode;
@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
     t = clock() - t;
 
     if(rank == size - 1) {
-        printf ("Work time: %f seconds\n", ((float)t)/CLOCKS_PER_SEC);
+        printf ("It took me %f seconds.\n", ((float)t)/CLOCKS_PER_SEC);
     }
 
     return 0;
