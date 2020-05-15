@@ -1,7 +1,7 @@
 #ifndef _H__CURVE_H
 #define _H__CURVE_H
 
-#include "Vector.h"
+#include "../Vector/Vector.h"
 #include <vector>
 #include <cassert>
 

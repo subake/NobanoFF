@@ -1,7 +1,7 @@
 #ifndef _H__BSPLINE_H
 #define _H__BSPLINE_H
 
-#include "Curve.h"
+#include "../Curve/Curve.h"
 
 class BSpline : public Curve {
 public:
